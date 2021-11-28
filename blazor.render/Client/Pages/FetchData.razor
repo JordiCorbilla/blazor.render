@@ -7,6 +7,15 @@
 
 <p>This component demonstrates fetching data from the server.</p>
 
+<EditForm Model="@inputModel" OnValidSubmit="@HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <InputNumber @bind-Value="inputModel.Temperature" />
+
+    <button type="submit">Submit</button>
+</EditForm>
+
 @if (_forecasts == null)
 {
     <p><em>Loading...</em></p>
@@ -21,10 +30,17 @@ else
 @code {
     private List<WeatherForecast> _forecasts;
     private string _render;
+    private InputModel inputModel = new InputModel();
     protected override async Task OnInitializedAsync()
     {
+        var requestUrl = "WeatherForecast";
         _forecasts = await Http.GetFromJsonAsync<List<WeatherForecast>>("WeatherForecast");
         _render = Table<WeatherForecast>.Add(_forecasts).ToHtml();
     }
 
+    private async Task HandleValidSubmit()
+    {
+        _forecasts = await Http.GetFromJsonAsync<List<WeatherForecast>>($"WeatherForecast?temperature={inputModel.Temperature}");
+        _render = Table<WeatherForecast>.Add(_forecasts).ToHtml();
+    }
 }
